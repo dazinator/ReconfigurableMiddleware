@@ -20,7 +20,8 @@ jobs:
       semVer: ${{ steps.gitversion.outputs.semVer }} # To use an output in another job, you have to map it to a job output.    
       semVerMajor: ${{ steps.gitversion.outputs.major }}
       semVerMinor: ${{ steps.gitversion.outputs.minor }}
-      branchName: ${{ steps.gitversion.outputs.branchName }}      
+      branchName: ${{ steps.gitversion.outputs.branchName }}
+      deployDocs: ${{ steps.set_deploy_flag.outputs.deploy == 'true' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -32,10 +33,12 @@ jobs:
         with:
           versionSpec: '5.x'
           preferLatestVersion: true
-     
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
+      - name: Set deploy docs flag
+        id: set_deploy_flag
+        run: echo "::set-output name=deploy::$DEPLOY_DOCS"
   dotnet-format:
     runs-on: ubuntu-latest
     steps:
@@ -127,8 +130,8 @@ jobs:
     #   run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
   docs:
     name: Deploy docs
-    if: ${{ env.DEPLOY_DOCS == 'true' }}
     needs: [calculate-variables] # see https://github.com/GitTools/actions/blob/main/docs/examples/github/gitversion/execute/usage-examples.md#example-7  
+    if: ${{ needs.calculate-variables.outputs.deploy == 'true' }}  
     env:
       SEMVER: ${{ needs.calculate-variables.outputs.semVer }}         
       SEMVER_MAJOR: ${{ needs.calculate-variables.outputs.semVerMajor }}
