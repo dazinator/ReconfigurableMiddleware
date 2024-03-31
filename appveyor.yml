@@ -3,7 +3,7 @@ image: Visual Studio 2022
 
 install:
   - cmd: choco install gitversion.portable --version 5.12.0 -y
-  - cmd: choco install dotnet-6.0-sdk --version 6.0.418 -y
+  - cmd: choco install dotnet-sdk --version 8.0.203 -y
 
 before_build:
   - ps: gitversion /l console /output buildserver

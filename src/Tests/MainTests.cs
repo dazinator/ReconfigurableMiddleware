@@ -1,7 +1,6 @@
 ﻿namespace Tests;
 
 [UnitTest]
-[UsesVerify]
 public class MainTests
 {
 
@@ -40,5 +39,5 @@ public class TestSubject
     public int GetResult()
     {
         return 1;
-    }  
+    }
 }

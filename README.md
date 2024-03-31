@@ -1,6 +1,6 @@
-## [Project-Name]
+## Reconfigurable Middleware
 
-Description of what it does
+Allow middleware in your asp.net core application to be configured, and reloaded when configuration changes.
 
 [docs :open_book:](https://dazinator.github.io/[Project-Name]/)
 

@@ -10,6 +10,9 @@ on:
 #  pull_request:
 #    branches: [ master, develop ]
 
+env:
+  DEPLOY_DOCS: false
+  
 jobs:
   calculate-variables:
     runs-on: ubuntu-latest
@@ -33,8 +36,6 @@ jobs:
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
-
-
   dotnet-format:
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +79,6 @@ jobs:
         with:
           branch: ${{ github.ref }}         
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
   build:
     runs-on: ubuntu-latest
     needs: [calculate-variables] # see https://github.com/GitTools/actions/blob/main/docs/examples/github/gitversion/execute/usage-examples.md#example-7
@@ -125,9 +125,9 @@ jobs:
     # - name: Publish
     #   if: startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/heads/develop')
     #   run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
-
   docs:
     name: Deploy docs
+    if: $DEPLOY_DOCS
     needs: [calculate-variables] # see https://github.com/GitTools/actions/blob/main/docs/examples/github/gitversion/execute/usage-examples.md#example-7  
     env:
       SEMVER: ${{ needs.calculate-variables.outputs.semVer }}         
@@ -161,7 +161,7 @@ jobs:
 
       - name: Publish new stable or latest version of docs to gh-pages branch
         env:
-          SITE_URL: https://dazinator.github.io/[Project-Name]/ 
+          SITE_URL: https://dazinator.github.io/ReconfigurableMiddleware/ 
        
         run: |
           git config user.name ci-bot
