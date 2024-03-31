@@ -131,7 +131,7 @@ jobs:
   docs:
     name: Deploy docs
     needs: [calculate-variables] # see https://github.com/GitTools/actions/blob/main/docs/examples/github/gitversion/execute/usage-examples.md#example-7  
-    if: ${{ needs.calculate-variables.outputs.deploy == 'true' }}  
+    if: ${{ needs.calculate-variables.outputs.deployDocs == 'true' }}  
     env:
       SEMVER: ${{ needs.calculate-variables.outputs.semVer }}         
       SEMVER_MAJOR: ${{ needs.calculate-variables.outputs.semVerMajor }}
