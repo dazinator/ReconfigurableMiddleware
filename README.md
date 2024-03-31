@@ -1,25 +1,74 @@
 ## Reconfigurable Middleware
 
-Allow middleware in your asp.net core application to be configured, and reloaded when configuration changes.
+Allow middleware in your asp.net core application to be re-configured, by reloading it when configuration changes.
 
-[docs :open_book:](https://dazinator.github.io/[Project-Name]/)
+## Example
 
-### Serving the Docs Locally
+appsettings.json:
 
-Make sure you have python 3 installed, then run the following commands in the repo root directory (you may have to run as administrator)
-
-```sh
-  pip install --upgrade pip setuptools wheel
-  pip install -r docs/requirements.txt 
+```json
+{
+ "Pipeline": {
+  "UseDeveloperExceptionPage": false
+ }
+}
 ```
 
-You can now build the docs site, and start the mkdocs server for live preview:
+startup.cs:
+
+```csharp
+
+public class Startup
+{
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var configSection = Configuration.GetSection("Pipeline");
+            services.Configure<PipelineOptions>(configSection);
+        }
+
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {            
+            // Note: Use vs Run (latter is terminal, former is not)
+            // make a change to appsettings.json "Pipelines" section and watch log output in console on furture requests.
+            app.UseReloadablePipeline<PipelineOptions>(ConfigureReloadablePipeline);
+            app.UseWelcomePage();
+        }
+
+        private void ConfigureReloadablePipeline(IApplicationBuilder appBuilder, IWebHostEnvironment environment, PipelineOptions options)
+        {
+            var logger = appBuilder.ApplicationServices.GetRequiredService<ILogger<Startup>>();
+            logger.LogInformation("Building reloadable pipeline from current options!");
+
+            if (options.UseDeveloperExceptionPage)
+            {
+                appBuilder.Use(async (context, onNext) =>
+                {
+                    var logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
+                    logger.LogInformation("Using dev middleware!");
+                    await onNext();
+                });
+            }
+            else
+            {
+                appBuilder.Use(async (context, onNext) =>
+                {
+                    var logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
+                    logger.LogInformation("Not using dev middleware..");
+                    await onNext();
+                });
+            }
+        }
+    }
 
 ```
-mkdocs build
-mkdocs serve
-```
-
-Browse to the docs site on `http://127.0.0.1:8000/` - the site will reload as you make changes.
-
-For more information including features, see [mkdocs-material](https://squidfunk.github.io/mkdocs-material/)
