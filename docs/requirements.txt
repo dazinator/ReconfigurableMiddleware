@@ -1,0 +1,7 @@
+mkdocs
+mkdocs-material
+mike
+pymdown-extensions
+mkdocs-include-markdown-plugin[cache]
+pillow
+cairosvg

@@ -1,0 +1,25 @@
+skip_tags: true
+image: Visual Studio 2022
+
+install:
+  - cmd: choco install gitversion.portable --version 5.12.0 -y
+  - cmd: choco install dotnet-6.0-sdk --version 6.0.418 -y
+
+before_build:
+  - ps: gitversion /l console /output buildserver
+
+build:
+  verbosity: detailed
+build_script:
+- cmd: dotnet format ./src -v normal --verify-no-changes
+- cmd: dotnet restore src -p:InformationalVersion=%GitVersion_InformationalVersion% -p:PackageVersion=%GitVersion_SemVer%
+- cmd: dotnet build src --no-restore -c Release -p:ContinuousIntegrationBuild=true -p:InformationalVersion=%GitVersion_InformationalVersion% -p:PackageVersion=%GitVersion_SemVer%
+- cmd: dotnet pack src --no-build -c Release -p:PackageVersion=%GitVersion_SemVer% --output %APPVEYOR_BUILD_FOLDER%/artifacts/
+artifacts:
+- path: artifacts/*
+deploy:
+  provider: NuGet
+  api_key:
+    secure: DwF9sQq5V/csRiBuNHKr3a1dBWzJS3GVJBcrKR0ZvePDGcQ47666Jgd6xqU5fvnl
+  skip_symbols: false
+  artifact: /.*\.nupkg/
